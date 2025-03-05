@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Login</title>
+    <script>
+        async function checkLogin() {
+            try {
+                // Call Cloudflare Access API to check the current user
+                let response = await fetch("/cdn-cgi/access/get-identity");
+                let data = await response.json();
+                
+                if (data.email) {
+                    // User is already authenticated
+                    document.getElementById("message").innerHTML = `Welcome, ${data.email}`;
+                    setTimeout(() => {
+                        window.location.href = "/dashboard"; // Redirect after login
+                    }, 1000);
+                } else {
+                    // If not authenticated, redirect directly to Cloudflare Zero Trust (Entra ID)
+                    window.location.href = "https://rovnet.cloudflareaccess.com/cdn-cgi/access/login/e1478cc8-813b-47a3-a651-852cca716c16";
+                }
+            } catch (error) {
+                console.error("Error checking login:", error);
+                // Redirect to Cloudflare login if there's an issue
+                window.location.href = "https://rovnet.cloudflareaccess.com/cdn-cgi/access/login/e1478cc8-813b-47a3-a651-852cca716c16";
+            }
+        }
+
+        // Run authentication check on page load
+        window.onload = checkLogin;
+    </script>
+</head>
+<body>
+    <h1 id="message">Authenticating...</h1>
+</body>
+</html>
